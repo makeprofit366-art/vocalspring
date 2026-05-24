@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinguaAI — Learn Any Language Free</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08080F;--bg2:#0F0F1C;--bg3:#161628;
+  --surface:#1A1A2E;--surface2:#20203A;
+  --brand:#7C6EF5;--brand2:#A78BFA;--brand3:#C4B5FD;
+  --accent:#38BDF8;--accent2:#06B6D4;
+  --gold:#FBBF24;--rose:#F472B6;--emerald:#34D399;
+  --text1:#F0F0FF;--text2:#A0A0C0;--text3:#5A5A80;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --r:18px;--r-sm:12px;--r-xs:8px;
+  --shadow:0 8px 32px rgba(0,0,0,0.4);
+  --glow:0 0 40px rgba(124,110,245,0.25);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text1);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,h4,h5{font-family:'Bricolage Grotesque',sans-serif}
+
+/* ── NOISE OVERLAY ── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");opacity:0.03;pointer-events:none;z-index:0}
+
+/* ── MESH BG ── */
+.mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.mesh-blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:0.15}
+.m1{width:700px;height:700px;background:var(--brand);top:-200px;left:-150px;animation:drift1 20s ease-in-out infinite}
+.m2{width:500px;height:500px;background:var(--accent);bottom:-150px;right:-100px;animation:drift2 25s ease-in-out infinite}
+.m3{width:400px;height:400px;background:var(--rose);top:40%;left:55%;animation:drift3 18s ease-in-out infinite}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,40px) scale(1.1)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-40px,-60px) scale(1.15)}}
+@keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-50px,30px) scale(0.9)}}
+
+/* ── UTILS ── */
+.z1{position:relative;z-index:1}
+.hidden{display:none!important}
+.flex{display:flex}.items-center{align-items:center}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.25rem 2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(8,8,15,0.7);backdrop-filter:blur(20px)}
+.nav-logo{font-family:'Bricolage Grotesque',sans-serif;font-size:1.5rem;font-weight:800;color:var(--text1);letter-spacing:-0.5px}
+.nav-logo span{color:var(--brand)}
+.nav-right{display:flex;gap:0.75rem;align-items:center}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2);padding:0.55rem 1.25rem;border-radius:100px;font-family:'Instrument Sans',sans-serif;font-size:0.875rem;font-weight:500;cursor:pointer;transition:all 0.2s}
+.btn-ghost:hover{border-color:var(--brand);color:var(--brand)}
+.btn-brand{background:var(--brand);color:white;border:none;padding:0.6rem 1.5rem;border-radius:100px;font-family:'Bricolage Grotesque',sans-serif;font-size:0.875rem;font-weight:700;cursor:pointer;transition:all 0.25s;box-shadow:0 0 20px rgba(124,110,245,0.3)}
+.btn-brand:hover{background:var(--brand2);box-shadow:0 0 30px rgba(124,110,245,0.5);transform:translateY(-1px)}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 4rem;position:relative;z-index:1}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(124,110,245,0.15);border:1px solid rgba(124,110,245,0.3);color:var(--brand3);font-size:0.8rem;font-weight:600;padding:0.4rem 1.1rem;border-radius:100px;margin-bottom:2rem;letter-spacing:0.3px}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--emerald);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:0.6}}
+.hero h1{font-size:clamp(3rem,7vw,5.5rem);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:1.5rem;color:var(--text1)}
+.hero h1 .grad{background:linear-gradient(135deg,var(--brand),var(--accent),var(--rose));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:1.15rem;color:var(--text2);max-width:580px;line-height:1.75;margin-bottom:3rem;font-weight:400}
+.hero-cta{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-bottom:4rem}
+.btn-hero{background:linear-gradient(135deg,var(--brand),var(--brand2));color:white;border:none;padding:1.1rem 2.75rem;border-radius:100px;font-family:'Bricolage Grotesque',sans-serif;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all 0.3s;box-shadow:0 0 40px rgba(124,110,245,0.35),0 4px 24px rgba(0,0,0,0.3);letter-spacing:-0.3px}
+.btn-hero:hover{transform:translateY(-3px);box-shadow:0 0 60px rgba(124,110,245,0.5),0 8px 32px rgba(0,0,0,0.4)}
+.btn-hero-out{background:rgba(255,255,255,0.05);backdrop-filter:blur(8px);border:1px solid var(--border2);color:var(--text1);padding:1.1rem 2.5rem;border-radius:100px;font-family:'Instrument Sans',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;transition:all 0.2s}
+.btn-hero-out:hover{background:rgba(255,255,255,0.1);border-color:var(--border2)}
+
+/* ── FLOATING LANG PILLS ── */
+.lang-ring{display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;max-width:700px}
+.lang-pill{background:rgba(255,255,255,0.05);border:1px solid var(--border2);backdrop-filter:blur(12px);color:var(--text1);padding:0.55rem 1.25rem;border-radius:100px;font-size:0.875rem;font-weight:500;display:flex;align-items:center;gap:0.5rem;animation:floatUp var(--d,3.5s) ease-in-out infinite var(--dl,0s)}
+@keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* ── STATS BAR ── */
+.stats-bar{margin-top:5rem;padding-top:4rem;border-top:1px solid var(--border);display:flex;gap:4rem;justify-content:center;flex-wrap:wrap}
+.stat-item{text-align:center}
+.stat-item .num{font-family:'Bricolage Grotesque',sans-serif;font-size:2.75rem;font-weight:800;background:linear-gradient(135deg,var(--text1),var(--text2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-item .label{font-size:0.8rem;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
+
+/* ── FEATURES ── */
+.features{padding:6rem 2rem;position:relative;z-index:1}
+.features-inner{max-width:1100px;margin:0 auto}
+.section-eyebrow{text-align:center;font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--brand);margin-bottom:1rem}
+.section-title{text-align:center;font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-1px;margin-bottom:1rem;color:var(--text1)}
+.section-sub{text-align:center;color:var(--text2);font-size:1rem;max-width:520px;margin:0 auto 3.5rem;line-height:1.7}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.75rem;transition:all 0.3s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,110,245,0.05),transparent);opacity:0;transition:opacity 0.3s}
+.feat-card:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:var(--shadow)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{font-size:2.5rem;margin-bottom:1rem}
+.feat-title{font-size:1.1rem;font-weight:700;color:var(--text1);margin-bottom:0.5rem}
+.feat-desc{font-size:0.875rem;color:var(--text2);line-height:1.65}
+
+/* ── HOW IT WORKS ── */
+.how{padding:6rem 2rem;background:var(--bg2);position:relative;z-index:1}
+.how-inner{max-width:900px;margin:0 auto}
+.steps{display:flex;flex-direction:column;gap:0;margin-top:3.5rem}
+.step{display:flex;gap:2rem;align-items:flex-start;padding:2rem 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-num{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2));display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-size:1.2rem;font-weight:800;color:white;flex-shrink:0;box-shadow:0 0 20px rgba(124,110,245,0.4)}
+.step-content h3{font-size:1.2rem;font-weight:700;color:var(--text1);margin-bottom:0.4rem}
+.step-content p{font-size:0.9rem;color:var(--text2);line-height:1.65}
+
+/* ── AUTH MODAL ── */
+.modal-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(8,8,15,0.85);backdrop-filter:blur(12px);padding:1rem}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:2.5rem;width:100%;max-width:440px;box-shadow:var(--shadow),var(--glow);position:relative;animation:modalIn 0.35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(0.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-close{position:absolute;top:1.25rem;right:1.25rem;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.modal-close:hover{background:rgba(255,255,255,0.12);color:var(--text1)}
+.modal-logo{font-family:'Bricolage Grotesque',sans-serif;font-size:1.4rem;font-weight:800;text-align:center;margin-bottom:0.25rem;color:var(--text1)}
+.modal-logo span{color:var(--brand)}
+.modal-tagline{text-align:center;font-size:0.8rem;color:var(--text3);margin-bottom:1.75rem}
+.tabs-row{display:flex;background:var(--bg3);border-radius:12px;padding:4px;margin-bottom:2rem;border:1px solid var(--border)}
+.tab-btn{flex:1;text-align:center;padding:0.6rem;border-radius:10px;font-size:0.875rem;font-weight:600;cursor:pointer;transition:all 0.2s;color:var(--text3);border:none;background:none;font-family:'Instrument Sans',sans-serif}
+.tab-btn.active{background:var(--surface2);color:var(--brand);box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.form-group{margin-bottom:1.1rem}
+.form-label{display:block;font-size:0.78rem;font-weight:600;color:var(--text2);margin-bottom:0.4rem;letter-spacing:0.2px}
+.form-input{width:100%;padding:0.875rem 1rem;background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:'Instrument Sans',sans-serif;font-size:0.95rem;color:var(--text1);outline:none;transition:all 0.2s}
+.form-input::placeholder{color:var(--text3)}
+.form-input:focus{border-color:var(--brand);background:var(--bg2);box-shadow:0 0 0 4px rgba(124,110,245,0.12)}
+.avatar-section label{font-size:0.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:0.75rem}
+.avatar-row{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.av-opt{width:50px;height:50px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:all 0.2s;overflow:hidden;flex-shrink:0}
+.av-opt img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.av-opt.picked{border-color:var(--brand);box-shadow:0 0 12px rgba(124,110,245,0.4)}
+.btn-submit{width:100%;padding:0.95rem;background:linear-gradient(135deg,var(--brand),var(--brand2));color:white;border:none;border-radius:var(--r-sm);font-family:'Bricolage Grotesque',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.25s;margin-top:0.5rem;letter-spacing:-0.2px}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 0 30px rgba(124,110,245,0.4)}
+.btn-submit:active{transform:translateY(0)}
+.or-divider{display:flex;align-items:center;gap:0.75rem;margin:1.25rem 0;color:var(--text3);font-size:0.78rem}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.social-btns{display:flex;gap:0.75rem}
+.btn-social{flex:1;padding:0.75rem;background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--r-sm);color:var(--text2);cursor:pointer;font-family:'Instrument Sans',sans-serif;font-size:0.82rem;font-weight:600;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:0.4rem}
+.btn-social:hover{border-color:var(--brand);color:var(--brand);background:rgba(124,110,245,0.08)}
+.err-box{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#FCA5A5;padding:0.75rem 1rem;border-radius:var(--r-xs);font-size:0.82rem;margin-bottom:1rem;display:none}
+.err-box.show{display:block}
+.strength-track{height:3px;background:var(--border);border-radius:100px;margin-top:0.4rem;overflow:hidden}
+.strength-fill{height:100%;border-radius:100px;transition:all 0.3s;width:0%}
+
+/* ── FOOTER ── */
+footer{padding:3rem 2rem;border-top:1px solid var(--border);text-align:center;position:relative;z-index:1}
+footer p{color:var(--text3);font-size:0.85rem}
+footer span{color:var(--brand)}
+</style>
+</head>
+<body>
+<div class="mesh">
+  <div class="mesh-blob m1"></div>
+  <div class="mesh-blob m2"></div>
+  <div class="mesh-blob m3"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Lingua<span>AI</span></div>
+  <div class="nav-right">
+    <button class="btn-ghost" onclick="openModal('login')">Sign in</button>
+    <button class="btn-brand" onclick="openModal('register')">Start Free →</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero z1">
+  <div class="hero-eyebrow"><div class="pulse"></div> Free Forever · No Ads · AI-Powered</div>
+  <h1>Learn Any Language<br><span class="grad">The Smart Way</span></h1>
+  <p class="hero-sub">Your personal AI tutor teaches in your own language first — then grows with you. See exactly how many days to fluency before you even start.</p>
+  <div class="hero-cta">
+    <button class="btn-hero" onclick="openModal('register')">Start Learning — It's Free</button>
+    <button class="btn-hero-out" onclick="openModal('login')">I Already Have an Account</button>
+  </div>
+  <div class="lang-ring">
+    <div class="lang-pill" style="--d:3.5s;--dl:0s">🇪🇸 Spanish</div>
+    <div class="lang-pill" style="--d:4s;--dl:0.3s">🇫🇷 French</div>
+    <div class="lang-pill" style="--d:3.2s;--dl:0.6s">🇯🇵 Japanese</div>
+    <div class="lang-pill" style="--d:4.5s;--dl:0.1s">🇩🇪 German</div>
+    <div class="lang-pill" style="--d:3.8s;--dl:0.8s">🇨🇳 Mandarin</div>
+    <div class="lang-pill" style="--d:4.2s;--dl:0.4s">🇰🇷 Korean</div>
+    <div class="lang-pill" style="--d:3.6s;--dl:0.9s">🇮🇳 Hindi</div>
+    <div class="lang-pill" style="--d:4.8s;--dl:0.2s">🇸🇦 Arabic</div>
+    <div class="lang-pill" style="--d:3.3s;--dl:0.7s">🇧🇷 Portuguese</div>
+    <div class="lang-pill" style="--d:4.1s;--dl:0.5s">🇮🇹 Italian</div>
+  </div>
+  <div class="stats-bar z1">
+    <div class="stat-item"><div class="num">50+</div><div class="label">Languages</div></div>
+    <div class="stat-item"><div class="num">2M+</div><div class="label">Active Learners</div></div>
+    <div class="stat-item"><div class="num">100%</div><div class="label">Free Forever</div></div>
+    <div class="stat-item"><div class="num">4.9★</div><div class="label">User Rating</div></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="features-inner">
+    <div class="section-eyebrow">Why LinguaAI</div>
+    <h2 class="section-title">Built different from day one</h2>
+    <p class="section-sub">Not another flashcard app. A real AI tutor that adapts, challenges, and celebrates you.</p>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon">🧠</div><div class="feat-title">Teaches in YOUR language</div><div class="feat-desc">Site auto-detects your native language. Explanations in your mother tongue so nothing gets lost.</div></div>
+      <div class="feat-card"><div class="feat-icon">🗺️</div><div class="feat-title">See your full roadmap</div><div class="feat-desc">Before you start, know exactly how many days, weeks and months to your goal. No guessing.</div></div>
+      <div class="feat-card"><div class="feat-icon">💬</div><div class="feat-title">Natural conversation</div><div class="feat-desc">Chat like a real person, not a robot. Your tutor has personality, patience, and knows your level.</div></div>
+      <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">Your own private dashboard</div><div class="feat-desc">Each email account gets a completely separate dashboard. Only you see your progress.</div></div>
+      <div class="feat-card"><div class="feat-icon">🎯</div><div class="feat-title">Goal-based learning</div><div class="feat-desc">Travel, work, exams, family — your path is shaped entirely by what you want to achieve.</div></div>
+      <div class="feat-card"><div class="feat-icon">🔥</div><div class="feat-title">Streaks & XP system</div><div class="feat-desc">Daily streaks, XP points, level-ups and milestones to keep you coming back every day.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="how-inner">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title" style="text-align:center">From zero to fluency in 4 steps</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-content"><h3>Create your free account</h3><p>Sign up with your email — that's it. Your account keeps your progress private and separate from every other user.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-content"><h3>Choose your language & goal</h3><p>Pick from 50+ languages. Tell us your current level and what you want to achieve — travel, career, exams or just fun.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-content"><h3>Get your personal roadmap</h3><p>We calculate exactly how long to fluency at your pace, broken into Basic → Intermediate → Advanced → Pro milestones.</p></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-content"><h3>Talk, learn & track progress</h3><p>Lessons, vocabulary, speaking and your personal AI tutor — all in one place. Watch your dashboard grow every day.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Made with ❤️ by <span>LinguaAI</span> · Free forever · No ads · No subscriptions</p>
+</footer>
+
+<!-- ── AUTH MODAL ── -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-logo">Lingua<span>AI</span></div>
+    <div class="modal-tagline">Your free language learning journey starts here 🌍</div>
+
+    <div class="tabs-row">
+      <button class="tab-btn active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="tab-btn" id="tab-register" onclick="switchAuthTab('register')">Create Account</button>
+    </div>
+
+    <div id="err" class="err-box"></div>
+
+    <!-- LOGIN -->
+    <div id="login-pane">
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" id="li-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="li-pass" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn-submit" onclick="doLogin()">Sign In →</button>
+      <div class="or-divider">or</div>
+      <div class="social-btns">
+        <button class="btn-social" onclick="demoLogin()">🎯 Try Demo Account</button>
+        <button class="btn-social" onclick="showErr('Google login coming soon!')">🔍 Google</button>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="register-pane" class="hidden">
+      <div class="form-group">
+        <label class="form-label">Your name</label>
+        <input class="form-input" type="text" id="rg-name" placeholder="e.g. Priya, Carlos, Yuna…" maxlength="30">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" id="rg-email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="rg-pass" placeholder="At least 6 characters" oninput="checkStrength(this.value)">
+        <div class="strength-track"><div class="strength-fill" id="strength-fill"></div></div>
+      </div>
+      <div class="avatar-section">
+        <label>Choose your avatar</label>
+        <div class="avatar-row" id="av-row"></div>
+      </div>
+      <button class="btn-submit" onclick="doRegister()">Create Free Account 🚀</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── AVATAR OPTIONS ───
+const AVATARS=[
+  'https://api.dicebear.com/7.x/notionists/svg?seed=Priya&backgroundColor=b6e3f4,c0aede',
+  'https://api.dicebear.com/7.x/notionists/svg?seed=Carlos&backgroundColor=d1f4e0,c0aede',
+  'https://api.dicebear.com/7.x/notionists/svg?seed=Yuna&backgroundColor=ffd5dc,ffdfbf',
+  'https://api.dicebear.com/7.x/notionists/svg?seed=Max&backgroundColor=c0aede,b6e3f4',
+  'https://api.dicebear.com/7.x/notionists/svg?seed=Aisha&backgroundColor=ffdfbf,d1f4e0',
+  'https://api.dicebear.com/7.x/notionists/svg?seed=Ravi&backgroundColor=e8d5f4,ffd5dc',
+];
+let pickedAvatar=AVATARS[0];
+
+function buildAvatars(){
+  document.getElementById('av-row').innerHTML=AVATARS.map((a,i)=>`
+    <div class="av-opt ${i===0?'picked':''}" onclick="pickAv(${i},this)">
+      <img src="${a}" loading="lazy" alt="Avatar">
+    </div>`).join('');
+}
+buildAvatars();
+
+function pickAv(i,el){
+  pickedAvatar=AVATARS[i];
+  document.querySelectorAll('.av-opt').forEach(e=>e.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+// ─── MODAL ───
+function openModal(tab){
+  document.getElementById('modal-overlay').classList.remove('hidden');
+  switchAuthTab(tab);
+  clearErr();
+}
+function closeModal(){document.getElementById('modal-overlay').classList.add('hidden')}
+function handleOverlayClick(e){if(e.target===document.getElementById('modal-overlay'))closeModal()}
+
+function switchAuthTab(t){
+  document.getElementById('tab-login').classList.toggle('active',t==='login');
+  document.getElementById('tab-register').classList.toggle('active',t==='register');
+  document.getElementById('login-pane').classList.toggle('hidden',t!=='login');
+  document.getElementById('register-pane').classList.toggle('hidden',t!=='register');
+  clearErr();
+}
+
+function showErr(msg){const e=document.getElementById('err');e.textContent=msg;e.classList.add('show')}
+function clearErr(){const e=document.getElementById('err');e.classList.remove('show')}
+
+function checkStrength(v){
+  const f=document.getElementById('strength-fill');
+  const s=v.length>=8&&/[A-Z]/.test(v)&&/[0-9]/.test(v)?100:v.length>=6?60:v.length>=3?30:0;
+  f.style.width=s+'%';
+  f.style.background=s>=100?'#34D399':s>=60?'#FBBF24':'#F472B6';
+}
+
+// ─── STORAGE ───
+function getUsers(){try{return JSON.parse(localStorage.getItem('la_users')||'{}')}catch{return{}}}
+function saveUsers(u){localStorage.setItem('la_users',JSON.stringify(u))}
+function setSession(e){localStorage.setItem('la_session',e)}
+
+// ─── REGISTER ───
+function doRegister(){
+  clearErr();
+  const name=document.getElementById('rg-name').value.trim();
+  const email=document.getElementById('rg-email').value.trim().toLowerCase();
+  const pass=document.getElementById('rg-pass').value;
+  if(!name){showErr('Please enter your name.');return}
+  if(!email||!email.includes('@')){showErr('Enter a valid email address.');return}
+  if(pass.length<6){showErr('Password must be at least 6 characters.');return}
+  const users=getUsers();
+  if(users[email]){showErr('An account with this email already exists — please sign in.');return}
+  users[email]={
+    name,email,pass,avatar:pickedAvatar,
+    xp:0,streak:0,wordsLearned:0,minutesToday:0,
+    skills:{vocabulary:0,grammar:0,listening:0,speaking:0,reading:0},
+    lessonsCompleted:0,weekData:[0,0,0,0,0,0,0],
+    targetLang:null,targetLangName:null,targetLangFlag:null,
+    level:null,goal:null,createdAt:Date.now()
+  };
+  saveUsers(users);
+  setSession(email);
+  window.location.href='onboard.html';
+}
+
+// ─── LOGIN ───
+function doLogin(){
+  clearErr();
+  const email=document.getElementById('li-email').value.trim().toLowerCase();
+  const pass=document.getElementById('li-pass').value;
+  if(!email||!pass){showErr('Please fill in all fields.');return}
+  const users=getUsers();
+  const user=users[email];
+  if(!user||user.pass!==pass){showErr('Email or password is incorrect.');return}
+  setSession(email);
+  window.location.href=user.targetLang?'dashboard.html':'onboard.html';
+}
+
+// ─── DEMO ───
+function demoLogin(){
+  const users=getUsers();
+  const email='demo@linguaai.com';
+  if(!users[email]){
+    users[email]={
+      name:'Demo User',email,pass:'demo123',
+      avatar:AVATARS[0],
+      xp:1240,streak:12,wordsLearned:218,minutesToday:23,
+      skills:{vocabulary:48,grammar:32,listening:61,speaking:22,reading:37},
+      lessonsCompleted:5,
+      weekData:[15,22,18,30,20,0,23],
+      targetLang:'es',targetLangName:'Spanish',targetLangFlag:'🇪🇸',
+      level:0,goal:'Travel',createdAt:Date.now()-30*86400000
+    };
+    saveUsers(users);
+  }
+  setSession(email);
+  window.location.href='dashboard.html';
+}
+
+// Auto-redirect if already logged in
+const sess=localStorage.getItem('la_session');
+const usrs=getUsers();
+if(sess&&usrs[sess]){window.location.href=usrs[sess].targetLang?'dashboard.html':'onboard.html'}
+</script>
+</body>
+</html>
