@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinguaAI — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08080F;--bg2:#0F0F1C;--bg3:#161628;
+  --surface:#1A1A2E;--surface2:#20203A;--surface3:#252545;
+  --brand:#7C6EF5;--brand2:#A78BFA;--brand3:#C4B5FD;
+  --accent:#38BDF8;--gold:#FBBF24;--rose:#F472B6;--emerald:#34D399;--orange:#FB923C;
+  --text1:#F0F0FF;--text2:#A0A0C0;--text3:#5A5A80;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --r:16px;--r-sm:12px;--r-xs:8px;
+  --shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+html,body{height:100%}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text1);display:flex;min-height:100vh}
+h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
+
+/* ─── SIDEBAR ─── */
+.sidebar{width:250px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh;flex-shrink:0;overflow-y:auto}
+.sb-brand{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
+.sb-logo{font-family:'Bricolage Grotesque',sans-serif;font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:1.25rem}
+.sb-logo span{color:var(--brand)}
+.sb-profile{display:flex;align-items:center;gap:0.875rem}
+.sb-av{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid rgba(124,110,245,0.4);flex-shrink:0}
+.sb-info .sb-name{font-weight:700;font-size:0.9rem;color:var(--text1)}
+.sb-info .sb-lang{font-size:0.75rem;color:var(--text3);margin-top:2px}
+.sb-xp-row{margin-top:0.6rem}
+.sb-xp-track{height:4px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden}
+.sb-xp-fill{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));border-radius:100px;transition:width 1s ease}
+.sb-xp-label{font-size:0.68rem;color:var(--text3);margin-top:4px}
+
+.sb-nav{flex:1;padding:1rem 0.75rem;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 0.875rem;border-radius:var(--r-sm);color:var(--text2);font-size:0.875rem;font-weight:500;cursor:pointer;transition:all 0.15s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:var(--text1)}
+.nav-item.active{background:rgba(124,110,245,0.15);color:var(--brand2);font-weight:600}
+.nav-item.active .ni{color:var(--brand)}
+.ni{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0}
+.nav-label{flex:1}
+.nav-badge{background:var(--brand);color:white;font-size:0.62rem;font-weight:700;padding:2px 7px;border-radius:100px}
+
+.sb-streak{padding:0.75rem 1rem;margin:0 0.75rem;border-radius:var(--r-sm);background:linear-gradient(135deg,rgba(251,146,60,0.2),rgba(251,191,36,0.15));border:1px solid rgba(251,146,60,0.3);display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem}
+.sb-streak-txt h4{font-family:'Bricolage Grotesque',sans-serif;font-size:0.875rem;font-weight:700;color:var(--orange)}
+.sb-streak-txt p{font-size:0.7rem;color:var(--text3);margin-top:2px}
+.sb-streak-num{font-family:'Bricolage Grotesque',sans-serif;font-size:1.75rem;font-weight:800;color:var(--gold);margin-left:auto}
+
+.sb-bottom{padding:0.875rem 1.25rem;border-top:1px solid var(--border);margin-top:auto}
+.logout-btn{display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--text3);cursor:pointer;transition:color 0.2s;background:none;border:none;font-family:'Instrument Sans',sans-serif;width:100%}
+.logout-btn:hover{color:#F472B6}
+
+/* ─── MAIN ─── */
+.main{flex:1;overflow-y:auto;background:var(--bg)}
+.tab-panel{display:none;padding:2rem;max-width:1080px;margin:0 auto;animation:fadeIn 0.3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.tab-panel.active{display:block}
+
+.page-hd{margin-bottom:1.75rem}
+.page-hd h1{font-size:1.75rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:0.2rem}
+.page-hd p{color:var(--text3);font-size:0.875rem}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem}
+.card-sm{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:1.25rem}
+.section-title{font-family:'Bricolage Grotesque',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text1);margin-bottom:1rem}
+
+/* STAT ROW */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-sm);padding:1.25rem;transition:border-color 0.2s}
+.stat-box:hover{border-color:var(--border2)}
+.stat-icon{font-size:1.4rem;margin-bottom:0.5rem}
+.stat-val{font-family:'Bricolage Grotesque',sans-serif;font-size:1.75rem;font-weight:800;color:var(--text1);line-height:1}
+.stat-lbl{font-size:0.72rem;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:0.4px;font-weight:600}
+.stat-change{font-size:0.78rem;color:var(--emerald);font-weight:600;margin-top:4px}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.5rem}
+
+/* SKILL BARS */
+.skill-row{display:flex;align-items:center;gap:1rem;margin-bottom:0.875rem}
+.skill-name{font-size:0.78rem;font-weight:600;color:var(--text2);width:88px;flex-shrink:0}
+.skill-track{flex:1;height:7px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden}
+.skill-bar{height:100%;border-radius:100px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.skill-pct{font-size:0.75rem;font-weight:700;color:var(--text3);width:30px;text-align:right;flex-shrink:0}
+
+/* WEEK CHART */
+.week-chart{display:flex;align-items:flex-end;gap:6px;height:72px;padding:0 2px}
+.wbar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.wbar{width:100%;border-radius:4px 4px 0 0;background:rgba(124,110,245,0.2);min-height:4px;transition:height 0.6s ease}
+.wbar.today{background:linear-gradient(180deg,var(--brand2),var(--brand))}
+.wday{font-size:0.65rem;color:var(--text3);font-weight:700}
+
+/* LESSON CARDS */
+.lessons-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem}
+.lcard{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:1.25rem;cursor:pointer;transition:all 0.25s}
+.lcard:hover:not(.locked){border-color:rgba(124,110,245,0.5);box-shadow:0 8px 24px rgba(124,110,245,0.12);transform:translateY(-2px)}
+.lcard.locked{opacity:0.45;cursor:not-allowed}
+.ltype-badge{display:inline-flex;align-items:center;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;padding:0.25rem 0.65rem;border-radius:100px;margin-bottom:0.75rem}
+.b-vocab{background:rgba(124,110,245,0.15);color:var(--brand3);border:1px solid rgba(124,110,245,0.25)}
+.b-grammar{background:rgba(251,191,36,0.12);color:var(--gold);border:1px solid rgba(251,191,36,0.2)}
+.b-listen{background:rgba(56,189,248,0.12);color:var(--accent);border:1px solid rgba(56,189,248,0.2)}
+.b-speak{background:rgba(52,211,153,0.12);color:var(--emerald);border:1px solid rgba(52,211,153,0.2)}
+.b-read{background:rgba(244,114,182,0.12);color:var(--rose);border:1px solid rgba(244,114,182,0.2)}
+.b-culture{background:rgba(251,146,60,0.12);color:var(--orange);border:1px solid rgba(251,146,60,0.2)}
+.ltitle{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:0.95rem;color:var(--text1);margin-bottom:0.35rem}
+.lmeta{display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--text3)}
+.ldot{width:3px;height:3px;border-radius:50%;background:var(--border2)}
+.lprog{height:3px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;margin-top:0.875rem}
+.lprog-fill{height:100%;background:var(--brand);border-radius:100px}
+
+/* VOCAB TABLE */
+.vtable{width:100%;border-collapse:collapse}
+.vtable th{text-align:left;padding:0.65rem 0.875rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--surface2)}
+.vtable td{padding:0.875rem;border-bottom:1px solid var(--border);font-size:0.875rem;vertical-align:middle}
+.vtable tr:last-child td{border-bottom:none}
+.vtable tr:hover td{background:rgba(255,255,255,0.02)}
+.vword{font-weight:700;color:var(--text1)}
+.vmean{color:var(--text2)}
+.mbar{width:72px;height:4px;background:rgba(255,255,255,0.07);border-radius:100px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:6px}
+.mfill{height:100%;border-radius:100px}
+
+/* MILESTONE */
+.msrow{display:flex;align-items:center;gap:0.875rem;padding:0.875rem 0;border-bottom:1px solid var(--border)}
+.msrow:last-child{border-bottom:none}
+.ms-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0}
+.ms-icon.done{background:rgba(52,211,153,0.15);color:var(--emerald)}
+.ms-icon.todo{background:rgba(255,255,255,0.05);color:var(--text3)}
+.ms-text{flex:1;font-size:0.875rem;font-weight:500}
+.ms-when{font-size:0.75rem;color:var(--text3)}
+
+/* ROADMAP */
+.roadmap{display:flex;align-items:center;margin-top:0.5rem}
+.rm-stage{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.rm-line{width:100%;height:5px;transition:background 0.3s}
+.rm-dot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.55rem;border:2px solid;transition:all 0.3s}
+.rm-label{text-align:center}
+.rm-label div:first-child{font-size:0.72rem;font-weight:700}
+.rm-label div:last-child{font-size:0.6rem;color:var(--text3);margin-top:2px}
+
+/* LANG POPUP */
+.lang-popup{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);padding:1.25rem;box-shadow:0 16px 48px rgba(0,0,0,0.5);z-index:100;width:250px;animation:popUp 0.4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popUp{from{opacity:0;transform:translateY(16px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.popup-head{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:0.875rem;margin-bottom:0.25rem;color:var(--text1)}
+.popup-sub{font-size:0.75rem;color:var(--text3);margin-bottom:0.875rem}
+.popup-opt{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border-radius:var(--r-xs);cursor:pointer;font-size:0.82rem;font-weight:500;transition:all 0.15s}
+.popup-opt:hover,.popup-opt.active{background:rgba(124,110,245,0.15);color:var(--brand2)}
+.popup-close{position:absolute;top:0.75rem;right:0.875rem;background:none;border:none;cursor:pointer;color:var(--text3);font-size:1rem;line-height:1}
+.popup-close:hover{color:var(--text1)}
+
+/* BTNS */
+.btn{padding:0.55rem 1.1rem;border-radius:100px;font-family:'Instrument Sans',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;border:none;display:inline-flex;align-items:center;gap:0.4rem}
+.btn-p{background:var(--brand);color:white}
+.btn-p:hover{background:var(--brand2);transform:translateY(-1px)}
+.btn-o{background:rgba(124,110,245,0.1);color:var(--brand3);border:1px solid rgba(124,110,245,0.25)}
+.btn-o:hover{background:rgba(124,110,245,0.2)}
+.btn-ghost{background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{background:rgba(255,255,255,0.09);color:var(--text1)}
+
+.pill-filters{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">Lingua<span>AI</span></div>
+    <div class="sb-profile">
+      <img class="sb-av" id="sb-av" src="" alt="Avatar">
+      <div class="sb-info">
+        <div class="sb-name" id="sb-name">—</div>
+        <div class="sb-lang" id="sb-lang">—</div>
+        <div class="sb-xp-row">
+          <div class="sb-xp-track"><div class="sb-xp-fill" id="sb-xp-fill" style="width:0%"></div></div>
+          <div class="sb-xp-label" id="sb-xp-label">0 XP</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <button class="nav-item active" onclick="switchTab('home',this)"><span class="ni">🏠</span><span class="nav-label">Home</span></button>
+    <button class="nav-item" onclick="switchTab('lessons',this)"><span class="ni">📚</span><span class="nav-label">Lessons</span><span class="nav-badge">3</span></button>
+    <button class="nav-item" onclick="switchTab('practice',this)"><span class="ni">🎯</span><span class="nav-label">Practice</span></button>
+    <button class="nav-item" onclick="switchTab('progress',this)"><span class="ni">📈</span><span class="nav-label">My Progress</span></button>
+    <button class="nav-item" onclick="switchTab('vocab',this)"><span class="ni">🔤</span><span class="nav-label">Vocabulary</span></button>
+    <button class="nav-item" onclick="window.location.href='tutor.html'"><span class="ni">✨</span><span class="nav-label">Talk to Tutor</span></button>
+  </nav>
+
+  <div style="padding:0 0.75rem 0.75rem">
+    <div class="sb-streak" id="sb-streak"></div>
+  </div>
+
+  <div class="sb-bottom">
+    <button class="logout-btn" onclick="logout()">🚪 Sign out of <span id="lb-name" style="margin-left:4px;font-weight:600;color:var(--brand3)"></span></button>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <!-- HOME -->
+  <div class="tab-panel active" id="tab-home">
+    <div class="page-hd">
+      <h1 id="home-h1">Welcome back 👋</h1>
+      <p id="home-date"></p>
+    </div>
+    <div class="stat-row" id="home-stats"></div>
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">Skills Overview</div>
+        <div id="home-skills"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">This Week's Activity</div>
+        <div class="week-chart" id="home-chart"></div>
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-top:1rem">
+          <span style="font-size:0.78rem;color:var(--text3)">Total this week:</span>
+          <strong id="week-total" style="color:var(--text1);font-size:0.875rem"></strong>
+        </div>
+      </div>
+    </div>
+    <div class="section-title" style="margin-bottom:0.875rem">Continue Learning</div>
+    <div class="lessons-grid" id="home-lessons"></div>
+  </div>
+
+  <!-- LESSONS -->
+  <div class="tab-panel" id="tab-lessons">
+    <div class="page-hd">
+      <h1>All Lessons</h1>
+      <p id="lessons-sub"></p>
+    </div>
+    <div class="pill-filters" id="lesson-filters"></div>
+    <div id="lessons-body"></div>
+  </div>
+
+  <!-- PRACTICE -->
+  <div class="tab-panel" id="tab-practice">
+    <div class="page-hd">
+      <h1>Practice Modes</h1>
+      <p>Short, focused drills to keep your skills sharp</p>
+    </div>
+    <div class="lessons-grid" id="practice-grid"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="tab-panel" id="tab-progress">
+    <div class="page-hd">
+      <h1>My Progress</h1>
+      <p id="progress-sub"></p>
+    </div>
+    <div class="stat-row" id="progress-stats"></div>
+    <div class="two-col">
+      <div class="card">
+        <div class="section-title">Skill Levels</div>
+        <div id="progress-skills"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Milestones</div>
+        <div id="milestone-list"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Fluency Roadmap</div>
+      <div class="roadmap" id="roadmap"></div>
+    </div>
+  </div>
+
+  <!-- VOCAB -->
+  <div class="tab-panel" id="tab-vocab">
+    <div class="page-hd">
+      <h1>Vocabulary</h1>
+      <p id="vocab-sub"></p>
+    </div>
+    <div class="card" style="overflow-x:auto">
+      <table class="vtable">
+        <thead><tr><th>Word</th><th>Meaning</th><th>Mastery</th><th>Last Seen</th><th></th></tr></thead>
+        <tbody id="vocab-body"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- LANG POPUP -->
+<div class="lang-popup" id="lang-popup" style="display:none">
+  <button class="popup-close" onclick="this.parentElement.style.display='none'">✕</button>
+  <div class="popup-head">🌐 Display Language</div>
+  <div class="popup-sub">Switch how the site shows for you:</div>
+  <div class="popup-opt active" onclick="pickUILang('en',this)">🇬🇧 English</div>
+  <div class="popup-opt" id="pop-native" onclick="pickUILang('native',this)"></div>
+  <div class="popup-opt" id="pop-immersion" onclick="pickUILang('immersion',this)">🎯 Full immersion (coming soon)</div>
+</div>
+
+<script>
+// ─── STORAGE ───
+function getUsers(){try{return JSON.parse(localStorage.getItem('la_users')||'{}')}catch{return{}}}
+function saveUsers(u){localStorage.setItem('la_users',JSON.stringify(u))}
+function getEmail(){return localStorage.getItem('la_session')}
+function logout(){localStorage.removeItem('la_session');window.location.href='index.html'}
+
+const email=getEmail();
+if(!email){window.location.href='index.html'}
+const allUsers=getUsers();
+const user=allUsers[email];
+if(!user||!user.targetLang){window.location.href='onboard.html'}
+
+// Ensure defaults
+['xp','streak','wordsLearned','minutesToday','lessonsCompleted'].forEach(k=>{if(!user[k])user[k]=0});
+if(!user.skills)user.skills={vocabulary:0,grammar:0,listening:0,speaking:0,reading:0};
+if(!user.weekData)user.weekData=[0,0,0,0,0,0,0];
+function saveUser(){allUsers[email]=user;saveUsers(allUsers)}
+
+// ─── SIDEBAR ───
+function initSidebar(){
+  document.getElementById('sb-av').src=user.avatar||'https://api.dicebear.com/7.x/notionists/svg?seed=default';
+  document.getElementById('sb-name').textContent=user.name;
+  document.getElementById('sb-lang').textContent=`${user.targetLangFlag||''} ${user.targetLangName||''}`;
+  document.getElementById('lb-name').textContent=user.name;
+  const pct=Math.min(((user.xp%500)/500)*100,100);
+  document.getElementById('sb-xp-fill').style.width=pct+'%';
+  document.getElementById('sb-xp-label').textContent=`${user.xp} XP · Level ${Math.floor(user.xp/500)+1}`;
+  document.getElementById('sb-streak').innerHTML=`
+    <div class="sb-streak-txt"><h4>${user.streak} Day Streak 🔥</h4><p>${user.streak>0?'Keep it going!':'Start your streak today!'}</p></div>
+    <div class="sb-streak-num">${user.streak}</div>`;
+  // lang popup native opt
+  document.getElementById('pop-native').textContent=`🌍 ${user.targetLangName} (Native feel)`;
+  document.getElementById('pop-immersion').textContent=`🎯 ${user.targetLangName} Immersion`;
+}
+initSidebar();
+
+// Popup
+setTimeout(()=>{document.getElementById('lang-popup').style.display='block'},1800);
+function pickUILang(mode,el){
+  document.querySelectorAll('.popup-opt').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ─── TABS ───
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  ({home:renderHome,lessons:renderLessons,practice:renderPractice,progress:renderProgress,vocab:renderVocab})[name]?.();
+}
+
+// ─── DATA ───
+const SKILLS_META=[
+  {key:'vocabulary',label:'Vocabulary',color:'#7C6EF5'},
+  {key:'grammar',label:'Grammar',color:'#FBBF24'},
+  {key:'listening',label:'Listening',color:'#38BDF8'},
+  {key:'speaking',label:'Speaking',color:'#34D399'},
+  {key:'reading',label:'Reading',color:'#F472B6'},
+];
+
+const LESSONS_DATA=[
+  {type:'vocab',badge:'b-vocab',title:'Greetings & Introductions',mins:5,xp:20,unit:1},
+  {type:'grammar',badge:'b-grammar',title:'Basic Sentence Structure',mins:8,xp:30,unit:1},
+  {type:'listen',badge:'b-listen',title:'Everyday Conversations',mins:10,xp:40,unit:1},
+  {type:'speak',badge:'b-speak',title:'Pronunciation Basics',mins:6,xp:25,unit:1},
+  {type:'read',badge:'b-read',title:'Simple Reading Texts',mins:7,xp:30,unit:1},
+  {type:'culture',badge:'b-culture',title:'Culture & Customs',mins:5,xp:20,unit:1},
+  {type:'vocab',badge:'b-vocab',title:'Numbers & Counting',mins:6,xp:25,unit:2,locked:true},
+  {type:'grammar',badge:'b-grammar',title:'Questions & Negations',mins:9,xp:35,unit:2,locked:true},
+  {type:'listen',badge:'b-listen',title:'Directions & Transport',mins:8,xp:35,unit:2,locked:true},
+  {type:'speak',badge:'b-speak',title:'Ordering Food & Drinks',mins:7,xp:30,unit:2,locked:true},
+];
+
+function getProgress(i){
+  if(i<user.lessonsCompleted)return 100;
+  if(i===user.lessonsCompleted)return 30;
+  return 0;
+}
+
+function lessonCard(l,i){
+  const prog=l.locked?0:getProgress(i);
+  return `<div class="lcard ${l.locked?'locked':''}" onclick="${l.locked?'':'window.location.href=\'tutor.html?lesson='+encodeURIComponent(l.title)+'&idx='+i+'\''}">
+    ${l.locked?'<div style="font-size:0.7rem;color:var(--text3);margin-bottom:0.5rem;font-weight:600">🔒 Complete Unit 1 first</div>':''}
+    <div class="ltype-badge ${l.badge}">${l.type.charAt(0).toUpperCase()+l.type.slice(1)}</div>
+    <div class="ltitle">${l.title}</div>
+    <div class="lmeta">
+      <span>⏱ ${l.mins} min</span><div class="ldot"></div>
+      <span>+${l.xp} XP</span>
+      ${prog===100?'<div class="ldot"></div><span style="color:var(--emerald);font-weight:600">✓ Done</span>':''}
+    </div>
+    <div class="lprog"><div class="lprog-fill" style="width:${prog}%"></div></div>
+  </div>`;
+}
+
+function renderSkills(targetId){
+  document.getElementById(targetId).innerHTML=SKILLS_META.map(s=>`
+    <div class="skill-row">
+      <div class="skill-name">${s.label}</div>
+      <div class="skill-track"><div class="skill-bar" style="width:${user.skills[s.key]||0}%;background:${s.color}"></div></div>
+      <div class="skill-pct">${user.skills[s.key]||0}%</div>
+    </div>`).join('');
+}
+
+function renderChart(){
+  const days=['M','T','W','T','F','S','S'];
+  const max=Math.max(...user.weekData,1);
+  const todayIdx=(new Date().getDay()+6)%7;
+  const total=user.weekData.reduce((a,b)=>a+b,0);
+  document.getElementById('week-total').textContent=total+' min';
+  document.getElementById('home-chart').innerHTML=days.map((d,i)=>{
+    const h=Math.round((user.weekData[i]/max)*100);
+    return `<div class="wbar-wrap">
+      <div class="wbar ${i===todayIdx?'today':''}" style="height:${h}%;"></div>
+      <div class="wday">${d}</div>
+    </div>`;
+  }).join('');
+}
+
+function greet(){const h=new Date().getHours();return h<12?'morning':h<17?'afternoon':'evening'}
+
+// ─── HOME ───
+function renderHome(){
+  document.getElementById('home-h1').textContent=`Good ${greet()}, ${user.name}! 👋`;
+  document.getElementById('home-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('home-stats').innerHTML=`
+    <div class="stat-box"><div class="stat-icon">⭐</div><div class="stat-val">${user.xp}</div><div class="stat-lbl">Total XP</div><div class="stat-change">Level ${Math.floor(user.xp/500)+1}</div></div>
+    <div class="stat-box"><div class="stat-icon">📖</div><div class="stat-val">${user.wordsLearned}</div><div class="stat-lbl">Words Learned</div><div class="stat-change">+${Math.floor(user.wordsLearned*0.04)||0} this week</div></div>
+    <div class="stat-box"><div class="stat-icon">⏱</div><div class="stat-val">${user.minutesToday}m</div><div class="stat-lbl">Today</div><div class="stat-change">Goal: 20 min/day</div></div>
+    <div class="stat-box"><div class="stat-icon">✅</div><div class="stat-val">${user.lessonsCompleted}</div><div class="stat-lbl">Lessons Done</div><div class="stat-change">${user.goal||''} path</div></div>`;
+  renderSkills('home-skills');
+  renderChart();
+  document.getElementById('home-lessons').innerHTML=LESSONS_DATA.slice(0,4).map((l,i)=>lessonCard(l,i)).join('');
+}
+renderHome();
+
+// ─── LESSONS ───
+function renderLessons(){
+  document.getElementById('lessons-sub').textContent=`Personalised for ${user.name} · ${user.targetLangFlag||''} ${user.targetLangName}`;
+  const filters=['All','Vocabulary','Grammar','Listening','Speaking','Reading'];
+  document.getElementById('lesson-filters').innerHTML=filters.map((f,i)=>`
+    <button class="btn ${i===0?'btn-p':'btn-ghost'}" onclick="filterL('${f}',this)">${f}</button>`).join('');
+  const u1=LESSONS_DATA.filter(l=>l.unit===1);
+  const u2=LESSONS_DATA.filter(l=>l.unit===2);
+  document.getElementById('lessons-body').innerHTML=`
+    <div class="section-title">🌱 Beginner — Unit 1</div>
+    <div class="lessons-grid">${u1.map((l,i)=>lessonCard(l,i)).join('')}</div>
+    <div class="section-title" style="margin-top:2rem">📖 Beginner — Unit 2</div>
+    <div class="lessons-grid">${u2.map((l,i)=>lessonCard(l,i+u1.length)).join('')}</div>`;
+}
+function filterL(f,btn){
+  document.querySelectorAll('#lesson-filters .btn').forEach(b=>{b.className='btn btn-ghost'});
+  btn.className='btn btn-p';
+}
+
+// ─── PRACTICE ───
+function renderPractice(){
+  const modes=[
+    {e:'🃏',t:'Flashcards',d:'Spaced repetition review',xp:15,m:'Flashcards'},
+    {e:'🎧',t:'Listening Quiz',d:'Hear it, choose the right answer',xp:25,m:'Listening Quiz'},
+    {e:'✍️',t:'Translation',d:'Translate sentences with instant feedback',xp:30,m:'Translation'},
+    {e:'🗣️',t:'Speak & Record',d:'Say it out loud and hear yourself back',xp:35,m:'Speaking'},
+    {e:'🧩',t:'Fill the Gap',d:'Complete sentences with the right word',xp:20,m:'Grammar Drill'},
+    {e:'💬',t:'Free Chat',d:'Open conversation with your personal tutor',xp:50,m:'Free Chat'},
+  ];
+  document.getElementById('practice-grid').innerHTML=modes.map(m=>`
+    <div class="lcard" onclick="window.location.href='tutor.html?mode=${encodeURIComponent(m.m)}'">
+      <div style="font-size:2.25rem;margin-bottom:0.75rem">${m.e}</div>
+      <div class="ltitle">${m.t}</div>
+      <div class="lmeta" style="flex-direction:column;align-items:flex-start;gap:4px">
+        <span>${m.d}</span>
+        <span style="color:var(--brand2);font-weight:700">+${m.xp} XP</span>
+      </div>
+    </div>`).join('');
+}
+
+// ─── PROGRESS ───
+function renderProgress(){
+  const LEVEL_MONTHS=[15,12,8,4];
+  const months=LEVEL_MONTHS[user.level||0];
+  const daysElapsed=Math.floor((Date.now()-user.createdAt)/86400000);
+  const totalDays=months*30;
+  const daysLeft=Math.max(totalDays-daysElapsed,1);
+  const pct=Math.round(Math.min((daysElapsed/totalDays)*100,100));
+  document.getElementById('progress-sub').textContent=`${user.name}'s personal journey to ${user.targetLangName} fluency`;
+  document.getElementById('progress-stats').innerHTML=`
+    <div class="stat-box"><div class="stat-icon">📅</div><div class="stat-val">${daysLeft}</div><div class="stat-lbl">Days Left</div><div class="stat-change">to fluency goal</div></div>
+    <div class="stat-box"><div class="stat-icon">📊</div><div class="stat-val">${pct}%</div><div class="stat-lbl">Path Complete</div></div>
+    <div class="stat-box"><div class="stat-icon">🔥</div><div class="stat-val">${user.streak}</div><div class="stat-lbl">Day Streak</div></div>
+    <div class="stat-box"><div class="stat-icon">⭐</div><div class="stat-val">${user.xp}</div><div class="stat-lbl">XP Earned</div></div>`;
+  renderSkills('progress-skills');
+  const milestones=[
+    {done:user.lessonsCompleted>=1,label:'Complete first lesson',when:'Day 1'},
+    {done:user.wordsLearned>=50,label:'Learn 50 words',when:'Week 1'},
+    {done:user.streak>=7,label:'7-day streak achieved',when:'Week 1'},
+    {done:user.lessonsCompleted>=6,label:'Finish Beginner Unit 1',when:'Month 1'},
+    {done:user.wordsLearned>=200,label:'Know 200 words',when:'Month 2'},
+    {done:false,label:'Hold a basic conversation',when:'Month '+Math.round(months*0.2)},
+    {done:false,label:'Intermediate fluency reached',when:'Month '+Math.round(months*0.5)},
+    {done:false,label:user.goal+' goal achieved 🎉',when:'Month '+months},
+  ];
+  document.getElementById('milestone-list').innerHTML=milestones.map(m=>`
+    <div class="msrow">
+      <div class="ms-icon ${m.done?'done':'todo'}">${m.done?'✓':'○'}</div>
+      <div class="ms-text" style="color:${m.done?'var(--text1)':'var(--text3)'}">${m.label}</div>
+      <div class="ms-when">${m.when}</div>
+    </div>`).join('');
+  const stages=[
+    {label:'Basics',mo:Math.round(months*0.15),done:user.lessonsCompleted>=2},
+    {label:'Beginner',mo:Math.round(months*0.3),done:user.lessonsCompleted>=6},
+    {label:'Intermediate',mo:Math.round(months*0.6),done:false},
+    {label:'Advanced',mo:Math.round(months*0.85),done:false},
+    {label:'Fluent ✨',mo:months,done:false},
+  ];
+  document.getElementById('roadmap').innerHTML=stages.map((s,i)=>`
+    <div class="rm-stage">
+      <div class="rm-line" style="background:${s.done?'var(--brand)':'rgba(255,255,255,0.07)'};border-radius:${i===0?'100px 0 0 100px':i===stages.length-1?'0 100px 100px 0':'0'}"></div>
+      <div class="rm-dot" style="border-color:${s.done?'var(--brand)':'var(--text3)'};color:${s.done?'var(--brand)':'var(--text3)'};background:${s.done?'rgba(124,110,245,0.2)':'rgba(255,255,255,0.04)'}">●</div>
+      <div class="rm-label">
+        <div style="color:${s.done?'var(--brand2)':'var(--text3)'};font-weight:700">${s.label}</div>
+        <div>Mo. ${s.mo}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── VOCAB ───
+function renderVocab(){
+  document.getElementById('vocab-sub').textContent=`${user.wordsLearned} words learned · Keep reviewing to hit 100% mastery`;
+  const WORDS_DEMO=[
+    {w:'Hola',m:'Hello',mastery:95,days:1},
+    {w:'Gracias',m:'Thank you',mastery:88,days:1},
+    {w:'Por favor',m:'Please',mastery:76,days:2},
+    {w:'Buenos días',m:'Good morning',mastery:62,days:3},
+    {w:'¿Cómo estás?',m:'How are you?',mastery:54,days:5},
+    {w:'Me llamo…',m:'My name is…',mastery:41,days:7},
+    {w:'Adiós',m:'Goodbye',mastery:33,days:8},
+    {w:'Lo siento',m:'I\'m sorry',mastery:20,days:10},
+    {w:'No entiendo',m:'I don\'t understand',mastery:15,days:12},
+    {w:'¿Habla inglés?',m:'Do you speak English?',mastery:8,days:14},
+  ];
+  document.getElementById('vocab-body').innerHTML=WORDS_DEMO.map(v=>`
+    <tr>
+      <td class="vword">${v.w}</td>
+      <td class="vmean">${v.m}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="mbar"><div class="mfill" style="width:${v.mastery}%;background:${v.mastery>70?'var(--emerald)':v.mastery>40?'var(--gold)':'var(--rose)'}"></div></div>
+          <span style="font-size:0.75rem;font-weight:700;color:var(--text2)">${v.mastery}%</span>
+        </div>
+      </td>
+      <td style="color:var(--text3);font-size:0.8rem">${v.days===1?'Today':v.days===2?'Yesterday':v.days+' days ago'}</td>
+      <td><button class="btn btn-o" onclick="window.location.href='tutor.html?mode=Flashcards'">Review</button></td>
+    </tr>`).join('');
+}
+</script>
+</body>
+</html>

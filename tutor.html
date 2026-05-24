@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinguaAI — Tutor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08080F;--bg2:#0F0F1C;--bg3:#161628;
+  --surface:#1A1A2E;--surface2:#20203A;
+  --brand:#7C6EF5;--brand2:#A78BFA;--brand3:#C4B5FD;
+  --accent:#38BDF8;--gold:#FBBF24;--rose:#F472B6;--emerald:#34D399;
+  --text1:#F0F0FF;--text2:#A0A0C0;--text3:#5A5A80;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --r:18px;--r-sm:12px;--r-xs:8px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Instrument Sans',sans-serif;background:var(--bg);color:var(--text1);display:flex;flex-direction:column}
+h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif}
+
+/* ── TOPBAR ── */
+.topbar{background:rgba(8,8,15,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0.875rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-shrink:0;z-index:10}
+.back-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border2);color:var(--text2);padding:0.5rem 1rem;border-radius:100px;cursor:pointer;font-family:'Instrument Sans',sans-serif;font-size:0.82rem;font-weight:600;transition:all 0.2s;display:flex;align-items:center;gap:0.4rem}
+.back-btn:hover{background:rgba(255,255,255,0.1);color:var(--text1)}
+.tutor-info{display:flex;align-items:center;gap:0.75rem;flex:1}
+.tutor-av-wrap{position:relative;flex-shrink:0}
+.tutor-av{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(124,110,245,0.4)}
+.online-dot{position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:var(--emerald);border:2px solid var(--bg)}
+.tutor-name{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:0.95rem;color:var(--text1)}
+.tutor-status{font-size:0.72rem;color:var(--emerald);font-weight:600;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:0.75rem;margin-left:auto}
+.xp-pill{background:rgba(124,110,245,0.15);border:1px solid rgba(124,110,245,0.3);color:var(--brand3);font-size:0.78rem;font-weight:700;padding:0.35rem 0.875rem;border-radius:100px}
+.lesson-pill{background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.2);color:var(--accent);font-size:0.75rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:100px}
+
+/* ── LAYOUT ── */
+.chat-layout{flex:1;display:flex;overflow:hidden}
+.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.sidebar-info{width:280px;border-left:1px solid var(--border);background:var(--bg2);overflow-y:auto;flex-shrink:0}
+
+/* ── MESSAGES ── */
+.messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.25rem;scroll-behavior:smooth}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:100px}
+
+/* message rows */
+.msg-row{display:flex;gap:0.875rem;animation:msgAppear 0.3s cubic-bezier(.34,1.3,.64,1)}
+@keyframes msgAppear{from{opacity:0;transform:translateY(12px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.msg-row.user{flex-direction:row-reverse}
+
+/* avatars */
+.msg-av{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--border2)}
+.msg-av.user-av{border-color:rgba(124,110,245,0.4)}
+
+/* bubbles */
+.bubble-wrap{display:flex;flex-direction:column;gap:4px;max-width:520px}
+.msg-row.user .bubble-wrap{align-items:flex-end}
+.bubble{padding:0.875rem 1.1rem;border-radius:18px;font-size:0.9rem;line-height:1.65;word-break:break-word}
+.bubble.ai{background:var(--surface);border:1px solid var(--border2);border-top-left-radius:4px;color:var(--text1)}
+.bubble.user{background:linear-gradient(135deg,var(--brand),#6B5CE7);color:white;border-top-right-radius:4px}
+.bubble-time{font-size:0.65rem;color:var(--text3);padding:0 4px}
+.bubble p{margin-bottom:0.5rem}
+.bubble p:last-child{margin-bottom:0}
+.bubble strong{color:var(--brand3);font-weight:700}
+.bubble em{color:var(--gold);font-style:normal}
+.bubble .word{display:inline-block;background:rgba(124,110,245,0.15);border:1px solid rgba(124,110,245,0.25);color:var(--brand3);padding:1px 8px;border-radius:6px;font-weight:700;font-size:0.88em;cursor:pointer;transition:all 0.15s}
+.bubble .word:hover{background:rgba(124,110,245,0.3)}
+.bubble .correct{color:var(--emerald);font-weight:700}
+.bubble .wrong{color:var(--rose);font-weight:700;text-decoration:line-through}
+.bubble .tip{display:block;margin-top:0.5rem;padding:0.6rem 0.875rem;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:var(--r-xs);font-size:0.82rem;color:var(--gold)}
+
+/* typing */
+.typing-bubble{padding:0.875rem 1.25rem;background:var(--surface);border:1px solid var(--border2);border-radius:18px;border-top-left-radius:4px;width:fit-content;display:flex;gap:5px;align-items:center}
+.td{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:tdAnim 1.4s ease-in-out infinite}
+.td:nth-child(2){animation-delay:0.2s}
+.td:nth-child(3){animation-delay:0.4s}
+@keyframes tdAnim{0%,80%,100%{transform:scale(0.75);opacity:0.4}40%{transform:scale(1.1);opacity:1}}
+
+/* quick replies */
+.qr-wrap{padding:0.75rem 1.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;border-top:1px solid var(--border)}
+.qr-btn{background:rgba(255,255,255,0.05);border:1px solid var(--border2);color:var(--text2);padding:0.45rem 0.875rem;border-radius:100px;font-size:0.78rem;font-weight:500;cursor:pointer;transition:all 0.2s;font-family:'Instrument Sans',sans-serif}
+.qr-btn:hover{border-color:var(--brand);color:var(--brand2);background:rgba(124,110,245,0.1)}
+
+/* input area */
+.input-area{padding:1rem 1.5rem;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.input-box{display:flex;align-items:flex-end;gap:0.75rem;background:var(--surface);border:1.5px solid var(--border2);border-radius:16px;padding:0.75rem 0.875rem;transition:border-color 0.2s}
+.input-box:focus-within{border-color:rgba(124,110,245,0.5);box-shadow:0 0 0 3px rgba(124,110,245,0.08)}
+.chat-input{flex:1;background:none;border:none;outline:none;font-family:'Instrument Sans',sans-serif;font-size:0.925rem;color:var(--text1);resize:none;min-height:22px;max-height:110px;line-height:1.5}
+.chat-input::placeholder{color:var(--text3)}
+.send-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all 0.2s;flex-shrink:0}
+.send-btn:hover:not(:disabled){transform:scale(1.08);box-shadow:0 0 16px rgba(124,110,245,0.4)}
+.send-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
+.input-hint{font-size:0.7rem;color:var(--text3);margin-top:0.4rem;padding:0 2px}
+
+/* ── SIDEBAR INFO ── */
+.si-section{padding:1.25rem;border-bottom:1px solid var(--border)}
+.si-title{font-family:'Bricolage Grotesque',sans-serif;font-size:0.82rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1rem}
+.xp-counter{text-align:center;padding:1rem}
+.xp-big{font-family:'Bricolage Grotesque',sans-serif;font-size:2.5rem;font-weight:800;color:var(--brand2)}
+.xp-label{font-size:0.75rem;color:var(--text3);margin-top:4px;font-weight:600}
+.words-list{display:flex;flex-direction:column;gap:0.5rem}
+.word-item{display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid var(--border);font-size:0.82rem}
+.word-item:last-child{border-bottom:none}
+.wi-word{font-weight:700;color:var(--text1)}
+.wi-mean{color:var(--text3)}
+.tips-list{display:flex;flex-direction:column;gap:0.625rem}
+.tip-item{background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.15);border-radius:var(--r-xs);padding:0.75rem;font-size:0.78rem;color:var(--text2);line-height:1.55}
+
+/* ── COMPLETION ── */
+.complete-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(8,8,15,0.9);backdrop-filter:blur(16px);animation:fadeIn 0.3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.complete-card{background:var(--surface2);border:1px solid var(--border2);border-radius:24px;padding:2.5rem;text-align:center;max-width:420px;width:100%;margin:1rem;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
+.cc-emoji{font-size:5rem;animation:bounceIn 0.6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bounceIn{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+.cc-title{font-family:'Bricolage Grotesque',sans-serif;font-size:2rem;font-weight:800;margin:0.75rem 0 0.4rem;letter-spacing:-0.5px}
+.cc-sub{color:var(--text2);font-size:0.9rem;margin-bottom:1.75rem}
+.xp-box{background:rgba(124,110,245,0.12);border:2px solid rgba(124,110,245,0.3);border-radius:var(--r-sm);padding:1.5rem;margin-bottom:1.5rem}
+.xp-box .num{font-family:'Bricolage Grotesque',sans-serif;font-size:3rem;font-weight:800;color:var(--brand2)}
+.xp-box .sub{font-size:0.8rem;color:var(--brand3);font-weight:600;margin-top:4px}
+.cc-stats{display:flex;gap:1rem;margin-bottom:1.75rem}
+.cc-stat{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--r-sm);padding:0.875rem 0.5rem;text-align:center}
+.cc-stat .n{font-family:'Bricolage Grotesque',sans-serif;font-size:1.5rem;font-weight:800;color:var(--text1)}
+.cc-stat .l{font-size:0.7rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:0.3px;margin-top:2px}
+.cc-btns{display:flex;flex-direction:column;gap:0.75rem}
+.btn-big{width:100%;padding:0.95rem;border-radius:var(--r-sm);font-family:'Bricolage Grotesque',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.25s;border:none;letter-spacing:-0.2px}
+.btn-big.primary{background:linear-gradient(135deg,var(--brand),var(--brand2));color:white}
+.btn-big.primary:hover{transform:translateY(-1px);box-shadow:0 0 24px rgba(124,110,245,0.4)}
+.btn-big.secondary{background:rgba(255,255,255,0.05);color:var(--text2);border:1px solid var(--border2)}
+.btn-big.secondary:hover{background:rgba(255,255,255,0.09);color:var(--text1)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <button class="back-btn" onclick="confirmLeave()">← Back</button>
+  <div class="tutor-info">
+    <div class="tutor-av-wrap">
+      <img class="tutor-av" id="tutor-av" src="https://api.dicebear.com/7.x/notionists/svg?seed=Maya&backgroundColor=b6e3f4,c0aede" alt="Tutor">
+      <div class="online-dot"></div>
+    </div>
+    <div>
+      <div class="tutor-name" id="tutor-name">Maya</div>
+      <div class="tutor-status" id="tutor-status">Online · Ready to teach</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="lesson-pill" id="lesson-pill">Free Conversation</div>
+    <div class="xp-pill" id="session-xp">+0 XP</div>
+  </div>
+</div>
+
+<div class="chat-layout">
+  <div class="chat-main">
+    <!-- MESSAGES -->
+    <div class="messages" id="messages"></div>
+
+    <!-- QUICK REPLIES -->
+    <div class="qr-wrap" id="qr-wrap"></div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+      <div class="input-box">
+        <textarea class="chat-input" id="chat-input" placeholder="Type your message…" rows="1"
+          onkeydown="handleKey(event)" oninput="autoGrow(this)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMsg()">➤</button>
+      </div>
+      <div class="input-hint">Press Enter to send · Shift+Enter for new line</div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar-info">
+    <div class="si-section">
+      <div class="si-title">Session XP</div>
+      <div class="xp-counter">
+        <div class="xp-big" id="si-xp">0</div>
+        <div class="xp-label">XP earned this session</div>
+      </div>
+    </div>
+    <div class="si-section">
+      <div class="si-title">Words Covered</div>
+      <div class="words-list" id="words-list">
+        <div style="font-size:0.8rem;color:var(--text3);font-style:italic">Words will appear as you learn them…</div>
+      </div>
+    </div>
+    <div class="si-section">
+      <div class="si-title">Learning Tips</div>
+      <div class="tips-list">
+        <div class="tip-item">💡 Repeat each new word out loud — saying it helps memory stick</div>
+        <div class="tip-item">🎯 Don't fear mistakes — your tutor will correct gently and explain why</div>
+        <div class="tip-item">🔁 Come back tomorrow — spaced repetition is the #1 learning method</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETION OVERLAY -->
+<div class="complete-overlay hidden" id="complete-overlay">
+  <div class="complete-card">
+    <div class="cc-emoji">🎉</div>
+    <div class="cc-title">Lesson Complete!</div>
+    <div class="cc-sub" id="cc-sub">You did brilliantly today.</div>
+    <div class="xp-box">
+      <div class="num" id="cc-xp">+0</div>
+      <div class="sub">XP Earned This Session</div>
+    </div>
+    <div class="cc-stats">
+      <div class="cc-stat"><div class="n" id="cc-msgs">0</div><div class="l">Messages</div></div>
+      <div class="cc-stat"><div class="n" id="cc-words">0</div><div class="l">New Words</div></div>
+      <div class="cc-stat"><div class="n" id="cc-mins">0</div><div class="l">Minutes</div></div>
+    </div>
+    <div class="cc-btns">
+      <button class="btn-big primary" onclick="goToDash()">Back to Dashboard</button>
+      <button class="btn-big secondary" onclick="keepGoing()">Keep Practising</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── AUTH ───
+function getUsers(){try{return JSON.parse(localStorage.getItem('la_users')||'{}')}catch{return{}}}
+function saveUsers(u){localStorage.setItem('la_users',JSON.stringify(u))}
+const email=localStorage.getItem('la_session');
+if(!email){window.location.href='index.html'}
+const allUsers=getUsers();
+const user=allUsers[email];
+if(!user){window.location.href='index.html'}
+function saveUser(){allUsers[email]=user;saveUsers(allUsers)}
+
+// ─── URL PARAMS ───
+const params=new URLSearchParams(location.search);
+const lessonTitle=params.get('lesson');
+const practiceMode=params.get('mode');
+const lessonIdx=parseInt(params.get('idx')||'0');
+
+// ─── TUTOR CHARACTERS ───
+const TUTORS=[
+  {name:'Maya',seed:'Maya',bg:'b6e3f4,c0aede',specialty:'Friendly & patient. Loves cultural stories and real-life examples.'},
+  {name:'Carlos',seed:'Carlos',bg:'d1f4e0,c0aede',specialty:'Energetic teacher. Makes grammar fun with games and challenges.'},
+  {name:'Yuki',seed:'Yuki',bg:'ffd5dc,ffdfbf',specialty:'Calm and methodical. Focuses on pronunciation and natural flow.'},
+];
+const tutor=TUTORS[Math.abs((email||'').charCodeAt(0)%3)];
+document.getElementById('tutor-av').src=`https://api.dicebear.com/7.x/notionists/svg?seed=${tutor.seed}&backgroundColor=${tutor.bg}`;
+document.getElementById('tutor-name').textContent=tutor.name;
+
+// ─── STATE ───
+let sessionXP=0;
+let sessionMsgs=0;
+let sessionWords=[];
+let sessionStart=Date.now();
+let history=[];
+let isLoading=false;
+let wordCount=0;
+
+const lang=user.targetLangName||'Spanish';
+const flag=user.targetLangFlag||'🇪🇸';
+const levelNames=['Absolute Beginner','Elementary','Intermediate','Advanced'];
+const level=levelNames[user.level||0];
+const goal=user.goal||'Travel';
+const lessonName=lessonTitle||practiceMode||'Free Conversation';
+document.getElementById('lesson-pill').textContent=`${flag} ${lessonName}`;
+
+// ─── SYSTEM PROMPT ───
+const SYSTEM=`You are ${tutor.name}, a warm, encouraging, expert language tutor at LinguaAI. You are teaching ${lang} to a student named ${user.name} who is at ${level} level. Their goal is: ${goal}.
+
+PERSONALITY: ${tutor.specialty} You speak naturally, warmly and with personality — never robotic. You celebrate progress genuinely. You're patient and never make the student feel bad.
+
+TEACHING RULES:
+- Teach ONE concept at a time, clearly
+- Always give the ${lang} word/phrase FIRST, then English meaning in parentheses
+- Use *word* format for key words the student should remember
+- Use this lesson focus: ${lessonName}
+- Give a short exercise or practice question after explaining each concept
+- When student makes an error, correct it gently: "Almost! The correct form is… because…"
+- Use emojis naturally but not excessively
+- Keep responses conversational — 2 to 4 short paragraphs MAX
+- Never say "As an AI" or "I'm a language model" — you are simply ${tutor.name}, their tutor
+
+FORMATTING:
+- Bold key ${lang} words with **word** markdown
+- Use ✓ for correct answers
+- Use 💡 for tips
+
+Start: greet ${user.name} warmly, introduce yourself briefly, and dive straight into the first lesson concept.`;
+
+// ─── UI HELPERS ───
+function getTime(){return new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',hour12:true})}
+
+function addBubble(role,text){
+  const wrap=document.getElementById('messages');
+  const row=document.createElement('div');
+  row.className=`msg-row ${role==='user'?'user':'ai'}`;
+
+  let avHtml='';
+  if(role==='user'){
+    avHtml=`<img class="msg-av user-av" src="${user.avatar||'https://api.dicebear.com/7.x/notionists/svg?seed=default'}" alt="You">`;
+  } else {
+    avHtml=`<img class="msg-av" src="${document.getElementById('tutor-av').src}" alt="${tutor.name}">`;
+  }
+
+  const formatted=formatText(text);
+  row.innerHTML=`
+    ${role!=='user'?avHtml:''}
+    <div class="bubble-wrap">
+      <div class="bubble ${role==='user'?'user':'ai'}">${formatted}</div>
+      <div class="bubble-time">${getTime()}</div>
+    </div>
+    ${role==='user'?avHtml:''}`;
+
+  wrap.appendChild(row);
+  wrap.scrollTop=wrap.scrollHeight;
+  extractWords(text);
+  return row;
+}
+
+function formatText(t){
+  // Bold words
+  t=t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  t=t.replace(/\*(.+?)\*/g,'<span class="word">$1</span>');
+  // Tips
+  t=t.replace(/💡\s*(.+)/g,'<span class="tip">💡 $1</span>');
+  // Newlines
+  t=t.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
+  return '<p>'+t+'</p>';
+}
+
+function extractWords(text){
+  const matches=text.match(/\*\*([^*]+)\*\*/g)||[];
+  matches.forEach(m=>{
+    const word=m.replace(/\*\*/g,'').trim();
+    if(!sessionWords.includes(word)&&word.length>1){
+      sessionWords.push(word);
+      updateWordsList();
+    }
+  });
+}
+
+function updateWordsList(){
+  if(sessionWords.length===0)return;
+  document.getElementById('words-list').innerHTML=sessionWords.map(w=>`
+    <div class="word-item">
+      <span class="wi-word">${w}</span>
+      <span class="wi-mean">✓ learned</span>
+    </div>`).join('');
+}
+
+function showTyping(){
+  const wrap=document.getElementById('messages');
+  const row=document.createElement('div');
+  row.className='msg-row ai';
+  row.id='typing-row';
+  row.innerHTML=`
+    <img class="msg-av" src="${document.getElementById('tutor-av').src}" alt="${tutor.name}">
+    <div class="typing-bubble"><div class="td"></div><div class="td"></div><div class="td"></div></div>`;
+  wrap.appendChild(row);
+  wrap.scrollTop=wrap.scrollHeight;
+}
+
+function removeTyping(){
+  const el=document.getElementById('typing-row');
+  if(el)el.remove();
+}
+
+function setQuickReplies(options){
+  document.getElementById('qr-wrap').innerHTML=options.map(o=>
+    `<button class="qr-btn" onclick="sendQuick('${o.replace(/'/g,"\\'")}')">Quick: ${o}</button>`).join('');
+}
+
+// ─── SEND ───
+function autoGrow(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,110)+'px';
+}
+
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}
+}
+
+function sendQuick(txt){
+  document.getElementById('chat-input').value=txt;
+  sendMsg();
+}
+
+function sendMsg(){
+  const inp=document.getElementById('chat-input');
+  const txt=inp.value.trim();
+  if(!txt||isLoading)return;
+  inp.value='';inp.style.height='auto';
+  addBubble('user',txt);
+  history.push({role:'user',content:txt});
+  sessionMsgs++;
+  callAI();
+}
+
+// ─── API ───
+async function callAI(initMsg){
+  isLoading=true;
+  document.getElementById('send-btn').disabled=true;
+  document.getElementById('tutor-status').textContent='Typing…';
+  document.getElementById('qr-wrap').innerHTML='';
+  showTyping();
+
+  const msgs=initMsg?[{role:'user',content:initMsg}]:[...history];
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:SYSTEM,
+        messages:msgs
+      })
+    });
+    const data=await res.json();
+    removeTyping();
+
+    const reply=data.content?.filter(b=>b.type==='text').map(b=>b.text).join('')||'Let me think about that for a second — could you try again?';
+    addBubble('ai',reply);
+    history.push({role:'assistant',content:reply});
+
+    // XP
+    sessionXP+=12;
+    wordCount+=sessionWords.length;
+    document.getElementById('si-xp').textContent=sessionXP;
+    document.getElementById('session-xp').textContent=`+${sessionXP} XP`;
+    document.getElementById('tutor-status').textContent=`Online · ${sessionMsgs} messages`;
+
+    // Quick replies after 3 exchanges
+    if(history.length>=6&&history.length%4===2){
+      setQuickReplies(['Give me an exercise','Explain that again','Teach me something new','How do I say…?']);
+    }
+
+    // Offer to complete after 8 exchanges
+    if(history.length>=16&&history.length%8===0){
+      setTimeout(()=>{
+        addBubble('ai',`You're doing a wonderful job, ${user.name}! 🎉 You've had a great session. Ready to wrap up and see your results, or would you like to keep going?`);
+        document.getElementById('qr-wrap').innerHTML=`
+          <button class="qr-btn" onclick="finishSession()" style="border-color:rgba(52,211,153,0.4);color:var(--emerald)">✅ Finish & see my results</button>
+          <button class="qr-btn" onclick="sendQuick('Keep teaching me please!')">Keep going 🚀</button>`;
+      },600);
+    }
+  }catch(err){
+    removeTyping();
+    addBubble('ai',`Hmm, I lost my connection for a second! 😅 Could you send that again? I'm here.`);
+    console.error(err);
+  }
+
+  isLoading=false;
+  document.getElementById('send-btn').disabled=false;
+}
+
+// ─── FINISH ───
+function finishSession(){
+  const mins=Math.round((Date.now()-sessionStart)/60000);
+  document.getElementById('cc-xp').textContent='+'+sessionXP;
+  document.getElementById('cc-msgs').textContent=sessionMsgs;
+  document.getElementById('cc-words').textContent=sessionWords.length;
+  document.getElementById('cc-mins').textContent=Math.max(mins,1);
+  const compliments=['You're on a roll!','Keep this up!','Consistency is everything!','Another step closer to fluency!'];
+  document.getElementById('cc-sub').textContent=compliments[Math.floor(Math.random()*compliments.length)];
+  document.getElementById('complete-overlay').classList.remove('hidden');
+  // Save progress
+  user.xp=(user.xp||0)+sessionXP;
+  user.wordsLearned=(user.wordsLearned||0)+sessionWords.length;
+  user.minutesToday=(user.minutesToday||0)+Math.max(mins,1);
+  user.lessonsCompleted=(user.lessonsCompleted||0)+1;
+  user.streak=(user.streak||0); // Streak handled separately
+  const todayIdx=(new Date().getDay()+6)%7;
+  if(!user.weekData)user.weekData=[0,0,0,0,0,0,0];
+  user.weekData[todayIdx]=(user.weekData[todayIdx]||0)+Math.max(mins,1);
+  // Update skill based on lesson type
+  const skillMap={vocab:'vocabulary',grammar:'grammar',listen:'listening',speak:'speaking',read:'reading'};
+  const lessonTypesHit=new Set();
+  history.filter(h=>h.role==='assistant').forEach(h=>{
+    if(/vocab|word|phrase/i.test(lessonName))lessonTypesHit.add('vocabulary');
+    if(/grammar|structure|sentence/i.test(lessonName))lessonTypesHit.add('grammar');
+    if(/listen|conversation/i.test(lessonName))lessonTypesHit.add('listening');
+    if(/speak|pronun|record/i.test(lessonName))lessonTypesHit.add('speaking');
+    if(/read|text/i.test(lessonName))lessonTypesHit.add('reading');
+  });
+  if(!user.skills)user.skills={vocabulary:0,grammar:0,listening:0,speaking:0,reading:0};
+  lessonTypesHit.forEach(s=>{user.skills[s]=Math.min((user.skills[s]||0)+5,100)});
+  // Always bump vocabulary a little
+  user.skills.vocabulary=Math.min((user.skills.vocabulary||0)+2,100);
+  saveUser();
+}
+
+function goToDash(){window.location.href='dashboard.html'}
+function keepGoing(){
+  document.getElementById('complete-overlay').classList.add('hidden');
+  sessionXP=0;sessionMsgs=0;sessionWords=[];sessionStart=Date.now();
+  document.getElementById('si-xp').textContent='0';
+  document.getElementById('session-xp').textContent='+0 XP';
+  document.getElementById('messages').innerHTML='';
+  history=[];
+  callAI('Let\'s continue! Give me a new concept or exercise.');
+}
+
+function confirmLeave(){
+  if(history.length>1){
+    if(confirm('Are you sure you want to leave? Your progress will be saved.')){finishSession();setTimeout(goToDash,200);}
+  }else{window.location.href='dashboard.html'}
+}
+
+// ─── INIT ───
+callAI(`Begin the lesson. I'm ready to learn ${lang} today! Topic: ${lessonName}`);
+setQuickReplies([`Teach me to say hello in ${lang}`,'Start from the very basics','Give me a simple exercise','Tell me about the culture']);
+</script>
+</body>
+</html>
